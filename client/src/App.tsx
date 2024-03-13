@@ -1,17 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { URLSearchParams } from "url";
 import DropDown from "./DropDown";
-
-enum TypeOfPrompt {
-    Text = "TEXT",
-    Speech = "SPEECH",
-    Image = "IMAGE"
-}
-
-interface SearchParam {
-    typeOfPrompt: TypeOfPrompt,
-    value: string,
-}
 
 const App: React.FC = () => {
     const [showDropDown, setShowDropDown] = useState<boolean>(false);

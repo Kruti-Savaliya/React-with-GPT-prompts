@@ -40,7 +40,7 @@ def members():
         return response.data[0].url
     
     elif isSpeechPrompt != None:
-        file_path="../../client/audio/"+isSpeechPrompt+".mp3"
+        file_path="../../client/audio/speech.mp3"
         path = Path(file_path)
         print(path.parent.absolute())        
         response = client.audio.speech.create(
