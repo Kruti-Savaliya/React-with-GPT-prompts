@@ -1,21 +1,19 @@
+import os
 from openai import OpenAI
 from flask import Flask, request
+from pathlib import Path
 
 app=Flask(__name__)
 
 # API Route
-
-client = OpenAI(
-  api_key = ""
-)
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 @app.route("/api/home", methods=["GET"])
 def members():
-    isImagePrompt = request.args.get('image')
-    isTextPrompt = request.args.get('text')
-
-    print("prompt1: ", isImagePrompt == None)
-    print("prompt2: ", isTextPrompt == None)
+    print(request)
+    isImagePrompt = request.args.get('Image')
+    isTextPrompt = request.args.get('Text')
+    isSpeechPrompt = request.args.get("Speech")
 
     if isTextPrompt != None:
         completion = client.chat.completions.create(
@@ -28,8 +26,7 @@ def members():
 
         return completion.choices[0].message.content
 
-    else:
-        
+    elif isImagePrompt != None:
         response = client.images.generate(
         model="dall-e-3",
         prompt=isImagePrompt,
@@ -38,10 +35,18 @@ def members():
         )
         print(response.data[0].url)
         return response.data[0].url
-
-
-    # print("The data is: ", prompt)
-    return {"1": ["Hello1", "Hello2", "Hello3"]}
+    
+    elif isSpeechPrompt != None:
+        file_path="../../client/audio/speech.mp3"
+        path = Path(file_path)
+        print(path.parent.absolute())        
+        response = client.audio.speech.create(
+        model="tts-1",
+        voice="alloy",
+        input=isSpeechPrompt,
+        
+        )
+        response.stream_to_file(path)
 
 if __name__ == "__main__":
     app.run(debug=True)
