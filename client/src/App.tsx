@@ -1,36 +1,17 @@
 import React, { useState, useEffect } from "react"
-import DropDown from "./DropDown";
+import { Box, Button, Container, FormControlLabel, FormLabel, Radio, RadioGroup, TextField, Typography } from "@mui/material";
 
 const App: React.FC = () => {
-    const [showDropDown, setShowDropDown] = useState<boolean>(false);
-    const [selectPrompt, setSelectPrompt] = useState<string>("");
-    const prompts = () => {
-        return ["Text", "Image", "Speech"];
-    };
-
+    const [value, setValue] = React.useState('Text');
     const [data, setData] = useState<undefined | string>(undefined);
-    const [input, setInput] = useState("")
+    const [input, setInput] = useState("Select")
 
     useEffect(() => {
         setInput("")
     }, [])
 
-    const toggleDropDown = () => {
-        setShowDropDown(!showDropDown);
-    };
-
-    const dismissHandler = (event: React.FocusEvent<HTMLButtonElement>): void => {
-        if (event.currentTarget === event.target) {
-            setShowDropDown(false);
-        }
-    };
-
-    const promptSelection = (prompt: string): void => {
-        setSelectPrompt(prompt);
-    };
-
     const fetchData = () => {
-        fetch(`/api/home?${selectPrompt}=${input}`, {
+        fetch(`/api/home?${value}=${input}`, {
             method: "GET",
             headers: {
                 Accept: 'application/json',
@@ -53,41 +34,66 @@ const App: React.FC = () => {
         else fetchData();
     }
 
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setValue((event.target as HTMLInputElement).value);
+    };
+
+    useEffect(() => {
+        console.log("The value of value changed: ", input)
+    }, [input])
+
     return (
-        <div>
-            <button
-                className={showDropDown ? "active" : undefined}
-                onClick={(): void => toggleDropDown()}
-                onBlur={(e: React.FocusEvent<HTMLButtonElement>): void =>
-                    dismissHandler(e)
+        <React.Fragment>
+            <Container maxWidth="lg" style={{ padding: "5%", width: "80%" }}>
+                <FormLabel id="demo-controlled-radio-buttons-group">Type of Prompt</FormLabel>
+                <RadioGroup
+                    row
+                    aria-labelledby="demo-radio-buttons-group-label"
+                    defaultValue="Text"
+                    value={value}
+                    onChange={handleChange}
+                    name="radio-buttons-group">
+                    <FormControlLabel value="Text" control={<Radio />} label="Text" />
+                    <FormControlLabel value="Image" control={<Radio />} label="Image" />
+                    <FormControlLabel value="Speech" control={<Radio />} label="Speech" />
+                </RadioGroup>
+                <br />
+                <TextField
+                    label="Prompt goes here...."
+                    size="small"
+                    variant="outlined"
+                    fullWidth
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => setInput(event.target.value)}
+                />
+                <br /> <br />
+                <Button variant="contained" onClick={handleSubmit}>Submit</Button>
+                <br /><br />
+                <FormLabel id="demo-controlled-radio-buttons-group">Output</FormLabel>
+                {
+                    data !== undefined && (
+                        <Box
+                            my={4}
+                            display="flex"
+                            alignItems="center"
+                            gap={4}
+                            p={2}
+                        >
+                            {value == "Text" ?
+                                (
+                                    <Typography variant="subtitle1" component="h2">
+                                        {data}
+                                    </Typography>
+
+                                ) : value == "Image" ?
+                                    (
+                                        <img src={data}></img>)
+                                    : <p>You selected audio</p>}
+
+                        </Box>
+                    )
                 }
-            >
-                <div>{selectPrompt ? "Select: " + selectPrompt : "Select ..."} </div>
-                {showDropDown && (
-                    <DropDown
-                        prompts={prompts()}
-                        showDropDown={false}
-                        toggleDropDown={(): void => toggleDropDown()}
-                        promptSelection={promptSelection}
-                    />
-                )}
-            </button>
-            <br /><br />
-            The prompt goes here: <input onChange={(event) => setInput(event.target.value)} />
-            <br /> <br />
-            <button onClick={handleSubmit}>Submit</button>
-            <br /><br />
-            {
-                data === undefined ? (<p>Loading....</p>) :
-                    selectPrompt == "Image" ? <img src={data}></img> :
-                        selectPrompt == "Text" ? <p>{data}</p> : (
-                            <audio controls>
-                                <source src="audio/marathi.mp3" type="audio/mpeg" />
-                            </audio>
-                        )
-            }
-            <p></p>
-        </div >
+            </Container>
+        </React.Fragment>
     )
 }
 
