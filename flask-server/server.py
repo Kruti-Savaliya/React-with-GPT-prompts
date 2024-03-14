@@ -6,10 +6,7 @@ from pathlib import Path
 app=Flask(__name__)
 
 # API Route
-
-client = OpenAI(
-  api_key = ""
-)
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 @app.route("/api/home", methods=["GET"])
 def members():
